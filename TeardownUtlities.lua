@@ -30,7 +30,6 @@ local colors = {
 
 
 
-
 --- Creates a uniform Axis-Aligned Bounding Box wireframe. extraSize (optional) adds a buffer area around the vec1 and vec2.
 function drawAABB(vec1, vec2, extraSize)
   
