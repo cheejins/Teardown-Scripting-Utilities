@@ -31,27 +31,39 @@ local colors = {
 
 
 
---- Creates a uniform Axis-Aligned Bounding Box wireframe.
-function drawAABB(vec)
+--- Creates a uniform Axis-Aligned Bounding Box wireframe. extraSize (optional) adds a buffer area around the vec1 and vec2.
+function drawAABB(vec1, vec2, extraSize)
   
-    local x = vec[1]
-    local y = vec[2]
-    local z = vec[3]
+    local x1 = vec1[1] + vectorLineRadius or 0
+    local y1 = vec1[2] - vectorLineRadius or 0
+    local z1 = vec1[3] + vectorLineRadius or 0
+
+    local x2 = vec2[1] - vectorLineRadius or 0
+    local y2 = vec2[2] + vectorLineRadius or 0
+    local z2 = vec2[3] - vectorLineRadius or 0
+
+    -- x lines top
+    DebugLine(Vec(x1,y1,z1), Vec(x2,y1,z1))
+    DebugLine(Vec(x1,y1,z2), Vec(x2,y1,z2))
+    -- x lines bottom
+    DebugLine(Vec(x1,y2,z1), Vec(x2,y2,z1))
+    DebugLine(Vec(x1,y2,z2), Vec(x2,y2,z2))
+    -- y lines
+    DebugLine(Vec(x1,y1,z1), Vec(x1,y2,z1))
+    DebugLine(Vec(x2,y1,z1), Vec(x2,y2,z1))
+    DebugLine(Vec(x1,y1,z2), Vec(x1,y2,z2))
+    DebugLine(Vec(x2,y1,z2), Vec(x2,y2,z2))
+    -- z lines top
+    DebugLine(Vec(x2,y1,z1), Vec(x2,y1,z2))
+    DebugLine(Vec(x2,y2,z1), Vec(x2,y2,z2))
+    -- z lines bottom
+    DebugLine(Vec(x1,y1,z2), Vec(x1,y1,z1))
+    DebugLine(Vec(x1,y2,z2), Vec(x1,y2,z1))
+    -- center cross line (blue)
+    DebugLine(Vec(x1,y1,z1), Vec(x2,y2,z2), 0,0,1)
+
+    local aabbStart = Vec(x1,y1,z1)
+    local aabbEnd = Vec(x2,y2,z2)
     
-    DebugLine(Vec(x,y,z), Vec(-x,y,z)) -- x lines top
-    DebugLine(Vec(x,y,-z), Vec(-x,y,-z))
-    DebugLine(Vec(x,-y,z), Vec(-x,-y,z)) -- x lines bottom
-    DebugLine(Vec(x,-y,-z), Vec(-x,-y,-z))
-
-    DebugLine(Vec(x,y,z), Vec(x,-y,z)) -- y lines
-    DebugLine(Vec(-x,y,z), Vec(-x,-y,z))
-    DebugLine(Vec(x,y,-z), Vec(x,-y,-z))
-    DebugLine(Vec(-x,y,-z), Vec(-x,-y,-z))
-
-    DebugLine(Vec(-x,y,z), Vec(-x,y,-z)) -- z lines top
-    DebugLine(Vec(-x,-y,z), Vec(-x,-y,-z)) -- z lines top
-    DebugLine(Vec(x,y,-z), Vec(x,y,z)) -- z lines bottom
-    DebugLine(Vec(x,-y,-z), Vec(x,-y,z)) -- z lines bottom
-
-    DebugLine(Vec(x,y,z), Vec(-x,-y,-z), 0,0,1) -- center cross line
+    local listOfShapesInAabb = QueryAabbShapes(aabbStart, aabbEnd)
 end
