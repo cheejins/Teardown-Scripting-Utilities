@@ -151,7 +151,8 @@ function RaycastFromTransform(tr, distance, rad, rejectBodies, rejectShapes)
     local h, d, n, s = QueryRaycast(tr.pos, direction, dist, rad)
     if h then
         local p = TransformToParentPoint(plyTransform, Vec(0, 0, d * -1))
-        return h, p, s
+        local b = GetShapeBody(s)
+        return h, p, s, b
     else
         return nil
     end
