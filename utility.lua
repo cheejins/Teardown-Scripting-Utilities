@@ -82,6 +82,12 @@ function AabbCheckOverlap(aMin, aMax, bMin, bMax)
     (aMin[2] <= bMax[2] and aMax[2] >= bMin[2]) and
     (aMin[3] <= bMax[3] and aMax[3] >= bMin[3])
 end
+function AabbCheckPointInside(aMin, aMax, p)
+    return 
+    (p[1] <= aMax[1] and p[1] >= aMin[1]) and
+    (p[2] <= aMax[2] and p[2] >= aMin[2]) and
+    (p[3] <= aMax[3] and p[3] >= aMin[3])
+end
 function AabbClosestEdge(pos, shape)
 
     local shapeAabbMin, shapeAabbMax = GetShapeBounds(shape)
@@ -115,6 +121,9 @@ function AabbSortEdges(startPos, endPos, edges)
     edges = tableSwapIndex(edges, 1, startIndex)
     edges = tableSwapIndex(edges, #edges, endIndex)
     return edges
+end
+function AabbDimensions(min, max)
+    return Vec(max[1] - min[1], max[2] - min[2], max[3] - min[3])
 end
 
 
