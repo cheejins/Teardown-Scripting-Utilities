@@ -175,11 +175,11 @@
         }
         return colors
     end
-    function DrawDot(pos, r, g, b)
+    function DrawDot(pos, l, w, r, g, b, a, dt)
         local dot = LoadSprite("ui/hud/dot-small.png")
         local spriteRot = QuatLookAt(pos, GetCameraTransform().pos)
         local spriteTr = Transform(pos, spriteRot)
-        DrawSprite(dot, spriteTr, 0.2, 0.2, r or 1, g or 1, b or 1, 1)
+        DrawSprite(dot, spriteTr, l or 0.2, w or 0.2, r or 1, g or 1, b or 1, a or 1, dt or true)
     end
 
 
