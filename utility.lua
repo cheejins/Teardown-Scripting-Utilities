@@ -20,7 +20,9 @@
 --[[QUAT]]
     function QuatLookDown(pos) return QuatLookAt(pos, VecAdd(pos, Vec(0, -1, 0))) end
     function QuatLookUp(pos) return QuatLookAt(pos, VecAdd(pos, Vec(0, 1, 0))) end
-
+    function QuatTrLookDown(tr) return QuatLookAt(tr.pos, TransformToParentPoint(tr, Vec(0,-1,0))) end
+    function QuatDir(dir) return QuatLookAt(Vec(0, 0, 0), dir) end -- Quat to 3d worldspace dir.
+    function GetQuatEulerVec(quat) local x,y,z = GetQuatEuler(quat) return Vec(x,y,z) end
 
 
 --[[AABB]]
@@ -104,15 +106,28 @@
         local mi, ma = GetShapeBounds(shape)
         return VecLerp(mi,ma,0.5)
     end
+    function AabbGetShapeCenterTopPos(shape, addY)
+        addY = addY or 0
+        local mi, ma = GetShapeBounds(shape)
+        local v =  VecLerp(mi,ma,0.5)
+        v[2] = ma[2] + addY
+        return v
+    end
 
 
 
 --[[TABLES]]
-    function tableSwapIndex(t, i1, i2)
+    function TableSwapIndex(t, i1, i2)
         local temp = t[i1]
         t[i1] = t[i2]
         t[i2] = temp
         return t
+    end
+
+    function TableClone(tb)
+        local tbc = {}
+        for k,v in pairs(tb) do tbc[k] = v end
+        return tbc
     end
 
 
@@ -136,12 +151,11 @@
         local direction = VecSub(fwdPos, plyTransform.pos)
         local dist = VecLength(direction)
         direction = VecNormalize(direction)
-        QueryRejectBody(rejectBody)
         local h, d, n, s = QueryRaycast(tr.pos, direction, dist, rad)
         if h then
             local p = TransformToParentPoint(plyTransform, Vec(0, 0, d * -1))
             local b = GetShapeBody(s)
-            return h, p, s, b
+            return h, p, s, b, d
         else
             return nil
         end
@@ -189,9 +203,9 @@
         beep = LoadSound("warning-beep"),
         buzz = LoadSound("light/spark0"),
         chime = LoadSound("elevator-chime"),}
-    function beep(pos, vol) PlaySound(debugSounds.beep, pos or GetPlayerPos(), vol or 0.3) end
-    function buzz(pos, vol) PlaySound(debugSounds.buzz, pos or GetPlayerPos(), vol or 0.3) end
-    function chime(pos, vol) PlaySound(debugSounds.chime, pos or GetPlayerPos(), vol or 0.3) end
+    function beep(pos, vol) PlaySound(debugSounds.beep, pos or GetCameraTransform().pos, vol or 0.3) end
+    function buzz(pos, vol) PlaySound(debugSounds.buzz, pos or GetCameraTransform().pos, vol or 0.3) end
+    function chime(pos, vol) PlaySound(debugSounds.chime, pos or GetCameraTransform().pos, vol or 0.3) end
 
 
 
@@ -203,6 +217,17 @@
     function nZero(n) if n == 0 then return 0.00000001 end return n end
     --- return number if not = 0, else return 0.00000001
     function rdm(min, max) return math.random(min or 0, max or 1) end
+    function clamp(value, mi, ma)
+        if value < mi then value = mi end
+        if value > ma then value = ma end
+        return value
+    end
+
+
+--[[LOGIC]]
+    function ternary ( cond , T , F )
+        if cond then return T else return F end
+    end
 
 
 
@@ -216,4 +241,40 @@
     function sfnCommas(dec)
         return tostring(math.floor(dec)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
         -- https://stackoverflow.com/questions/10989788/format-integer-in-lua
+    end
+
+
+--[[TIMERS]]
+
+    ---Call a function on a timer.
+    ---@param timer table -- {time, rpm}
+    ---@param func function -- Function to run.
+    function TimerRunTimer(timer, func)
+        if timer.time <= 0 then
+            timer.time = 60/timer.rpm
+            func()
+        else
+            timer.time = timer.time - GetTimeStep()
+        end
+    end
+
+    function TimerEndTime(timer)
+        timer.time = 0
+    end
+
+    function TimerResetTime(timer)
+        timer.time = 60/timer.rpm
+    end
+
+    function TimerAddTimer(containingTable, time, rpm, intialTime)
+        if intialTime then time = 60/rpm end
+
+        for i = 1, containingTable[i] do -- Root table.
+
+            -- Check for valid pre-existing indexes.
+            
+
+        end
+
+        table.insert(containingTable, {time, rpm})
     end
