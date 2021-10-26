@@ -246,35 +246,37 @@
 
 --[[TIMERS]]
 
-    ---Call a function on a timer.
-    ---@param timer table -- {time, rpm}
-    ---@param func function -- Function to run.
-    function TimerRunTimer(timer, func)
+    ---Run a timer and a table of functions.
+    ---@param timer table -- = {time, rpm}
+    ---@param functions table -- Table of functions that are called when time = 0.
+    ---@param runTime boolean -- False = do not countdown timer while calling this function.
+    function TimerRunTimer(timer, functions, runTime)
         if timer.time <= 0 then
-            timer.time = 60/timer.rpm
-            func()
-        else
+
+            TimerResetTime(timer)
+
+            for i = 1, #functions do
+                functions[i]()
+            end
+
+        elseif runTime then
+            TimerRunTime(timer)
+        end
+    end
+
+    -- Only runs the timer countdown if there is time left.
+    function TimerRunTime(timer)
+        if timer.time > 0 then
             timer.time = timer.time - GetTimeStep()
         end
     end
 
+    -- Set time left to 0.
     function TimerEndTime(timer)
         timer.time = 0
     end
 
+    -- Reset time to start (60/rpm).
     function TimerResetTime(timer)
         timer.time = 60/timer.rpm
-    end
-
-    function TimerAddTimer(containingTable, time, rpm, intialTime)
-        if intialTime then time = 60/rpm end
-
-        for i = 1, containingTable[i] do -- Root table.
-
-            -- Check for valid pre-existing indexes.
-            
-
-        end
-
-        table.insert(containingTable, {time, rpm})
     end
