@@ -124,7 +124,7 @@ Weapons
     Scene Object
         - Body within Vehicle
             - Location: Pivot point
-            -     
+
 
 HUD
     Indicator: Secondary weapon timer.
