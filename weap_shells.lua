@@ -12,30 +12,30 @@ do
         -- projectiles (follow a quadratic path)
         ShellParts.types.projectiles = {}
 
-            -- bullets
-            ShellParts.types.projectiles.bullets = {}
+            -- -- bullets
+            -- ShellParts.types.projectiles.bullets = {}
 
-            -- bombs
-            ShellParts.types.projectiles.bombs = {}
+            -- -- bombs
+            -- ShellParts.types.projectiles.bombs = {}
 
-            -- barrages
-            ShellParts.types.projectiles.barrages = {}
+            -- -- barrages
+            -- ShellParts.types.projectiles.barrages = {}
 
 
         ShellParts.types.pathed = {}
 
-            -- rockets
-            ShellParts.types.projectiles.rockets = {}
+            -- -- rockets
+            -- ShellParts.types.pathed.rockets = {}
 
-            -- missiles (homing rockets)
-            ShellParts.types.pathed.missiles = {}
+            -- -- missiles (homing rockets)
+            -- ShellParts.types.pathed.missiles = {}
 
 
         -- hitscan (instant hit)
         ShellParts.types.hitscan = {}
 
-            -- laser
-            ShellParts.types.hitscan.laser = {}
+            -- -- laser
+            -- ShellParts.types.hitscan.laser = {}
 
     end
 
@@ -52,19 +52,45 @@ do
     ShellParts.hitBehaviours = {}
     do
         -- sticky
-        ShellParts.hitBehaviours.sticky = {}
+        ShellParts.hitBehaviours.sticky = {
+            -- hit = stick to a shape
+            -- wait until calling hit action
+                -- fx function or something
+                    -- halo plasma grenade
+                    -- semtex
+                    -- no fx
+        }
         -- bouncy
-        ShellParts.hitBehaviours.bouncy = {}
+        ShellParts.hitBehaviours.bouncy = {
+            -- set tr to dir normal
+        }
+    end
+
+    ShellParts.hitActions = {}
+    do
         -- penetrating
-        ShellParts.hitBehaviours.penetrating = {}
+        ShellParts.hitActions.penetrating = {
+            -- rate of speed decc in %
+        }
 
         -- hole
-        ShellParts.hitBehaviours.hole = {}
-        -- explosive
-        ShellParts.hitBehaviours.explode = {}
-        -- combust
-        ShellParts.hitBehaviours.combust = {}
+        ShellParts.hitActions.hole = {
+            -- hole size
+        }
 
+        -- explosive
+        ShellParts.hitActions.explode = {
+            -- explosion size
+            -- explosion delay
+            -- explosion cluster
+        }
+
+        -- combust
+        ShellParts.hitActions.combust = {
+            -- particles follow spread
+            -- spread speed
+            -- spread radius
+        }
     end
 
 end
@@ -80,7 +106,8 @@ Shell = {
         hitcount = 0,       -- Used for bounces.
         isActive = false,   -- Shell still exists.
         isfinished = false, -- Still has finished and is ready for removal.
-        lifeLength = 2,     -- How long a shell exists from the time it is spawned.
+        activeTime = 0,     -- Duration the shell has been active.
+        activeDuration = 2, -- How long a shell exists from the time it is spawned.
     },
 
     query = {
@@ -104,10 +131,10 @@ Shell = {
 
     homing = {
         sourceTr = nil,
-        strength = nil,
         targetBody = nil,
         targetShape = nil,
         targetTr = nil,
+        strength = nil,
     }
 
 }
@@ -115,11 +142,11 @@ Shell = {
 
 -- Shell modifiers
 do
-    Shell.modify_life = function(self, isActive, finished, hit, lifeLength, tr)
+    Shell.modify_life = function(self, isActive, finished, hit, activeDuration)
         self.hit        = hit
         self.isActive   = isActive
         self.isfinished   = finished
-        self.lifeLength = lifeLength
+        self.activeDuration = activeDuration
     end
 
     Shell.modify_query = function(self, ignoreShapes, ignoreBodies, ignoreVehicles, ignoreTags, ignoreLayers)
@@ -143,12 +170,43 @@ do
 end
 
 
+-- ShellParts from presets.
+Shell.setAbility = function(self)
+end
 
--- Shell = {
---     type = {},
---     abilities = {},
---     hitBehaviours = {},
--- }
+Shell.setHitBehaviour = function(self)
+end
+
+Shell.setParticle = function(self)
+end
+
+Shell.setPhysics = function(self)
+end
+
+Shell.setSounds = function(self)
+end
+
+Shell.setType = function(self)
+end
+
+-- ShellFunctions
+Shell.propel = function(self)
+    -- change the shell tr based on the physics of the shell.
+end
+
+Shell.home = function(self)
+    -- home a shell towards a target position
+    -- change rotation of the shell based on the speed of the shell and the homing strength.
+end
+
+Shell.hit()
+
+
+
+
+
+
+
 
 
 
@@ -163,23 +221,6 @@ function SpawnShell(tr, shellPreset, shellQueries)
 end
 
 
--- ShellParts from presets.
-Shell.setAbility()
-Shell.setHitBehaviour()
-Shell.setParticle()
-Shell.setPhysics()
-Shell.setSounds()
-Shell.setType()
-
--- ShellPresets
--- Shell.setPreset()
-
--- ShellFunctions
--- Shell.propel()
--- Shell.home() -- Home a shell towards a target position
--- Shell.hit()
-
-
 --[[
 
     Things to try
@@ -187,20 +228,5 @@ Shell.setType()
     - Create a bullet (shoots straight, slows)
     - Create a projectile (slows down, drops down)
     - Create a rocket (starts slow, dropping, and speeds up)
-
-]]
-
-
-
---[[
-
-    Use cases:
-
-        - Shell spawning
-
-            - Spawn a bullet that ignores body tags
-                - tr
-                - bullet preset
-                    - high vel, small hole
 
 ]]
