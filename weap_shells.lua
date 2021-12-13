@@ -9,7 +9,7 @@ do
     ShellParts.types = {}
     do
 
-        -- projectiles (follow a quadratic path)
+        -- projectiles (free projectiles)
         ShellParts.types.projectiles = {}
 
             -- -- bullets
@@ -22,6 +22,7 @@ do
             -- ShellParts.types.projectiles.barrages = {}
 
 
+        -- shells which follow a path. used for predicted hit position
         ShellParts.types.pathed = {}
 
             -- -- rockets
@@ -30,8 +31,7 @@ do
             -- -- missiles (homing rockets)
             -- ShellParts.types.pathed.missiles = {}
 
-
-        -- hitscan (instant hit)
+        -- hitscan (instant raycast hit)
         ShellParts.types.hitscan = {}
 
             -- -- laser
@@ -40,58 +40,58 @@ do
     end
 
 
-    ShellParts.abilities = {}
-    do
-        -- homing
-        ShellParts.abilities.homing = {}
-        -- barrage
-        ShellParts.abilities.barrage = {}
-    end
+    -- ShellParts.abilities = {}
+    -- do
+    --     -- homing
+    --     ShellParts.abilities.homing = {}
+    --     -- barrage
+    --     ShellParts.abilities.barrage = {}
+    -- end
 
 
-    ShellParts.hitBehaviours = {}
-    do
-        -- sticky
-        ShellParts.hitBehaviours.sticky = {
-            -- hit = stick to a shape
-            -- wait until calling hit action
-                -- fx function or something
-                    -- halo plasma grenade
-                    -- semtex
-                    -- no fx
-        }
-        -- bouncy
-        ShellParts.hitBehaviours.bouncy = {
-            -- set tr to dir normal
-        }
-    end
+    -- ShellParts.hitBehaviours = {}
+    -- do
+    --     -- sticky
+    --     ShellParts.hitBehaviours.sticky = {
+    --         -- hit = stick to a shape
+    --         -- wait until calling hit action
+    --             -- fx function or something
+    --                 -- halo plasma grenade
+    --                 -- semtex
+    --                 -- no fx
+    --     }
+    --     -- bouncy
+    --     ShellParts.hitBehaviours.bouncy = {
+    --         -- set tr to dir normal
+    --     }
+    -- end
 
-    ShellParts.hitActions = {}
-    do
-        -- penetrating
-        ShellParts.hitActions.penetrating = {
-            -- rate of speed decc in %
-        }
+    -- ShellParts.hitActions = {}
+    -- do
+    --     -- penetrating
+    --     ShellParts.hitActions.penetrating = {
+    --         -- rate of speed decc in %
+    --     }
 
-        -- hole
-        ShellParts.hitActions.hole = {
-            -- hole size
-        }
+    --     -- hole
+    --     ShellParts.hitActions.hole = {
+    --         -- hole size
+    --     }
 
-        -- explosive
-        ShellParts.hitActions.explode = {
-            -- explosion size
-            -- explosion delay
-            -- explosion cluster
-        }
+    --     -- explosive
+    --     ShellParts.hitActions.explode = {
+    --         -- explosion size
+    --         -- explosion delay
+    --         -- explosion cluster
+    --     }
 
-        -- combust
-        ShellParts.hitActions.combust = {
-            -- particles follow spread
-            -- spread speed
-            -- spread radius
-        }
-    end
+    --     -- combust
+    --     ShellParts.hitActions.combust = {
+    --         -- particles follow spread
+    --         -- spread speed
+    --         -- spread radius
+    --     }
+    -- end
 
 end
 
@@ -142,68 +142,77 @@ Shell = {
 
 -- Shell modifiers
 do
-    Shell.modify_life = function(self, isActive, finished, hit, activeDuration)
-        self.hit        = hit
-        self.isActive   = isActive
-        self.isfinished   = finished
-        self.activeDuration = activeDuration
+
+    Shell.set_life = function(...)
+
+        local tb = table.unpack({...})
+        for index, value in pairs(tb) do
+            self.life[index] = value
+        end
+
     end
 
-    Shell.modify_query = function(self, ignoreShapes, ignoreBodies, ignoreVehicles, ignoreTags, ignoreLayers)
-        self.ignoreBodies   = ignoreBodies
-        self.ignoreLayers   = ignoreLayers
-        self.ignoreShapes   = ignoreShapes
-        self.ignoreTags     = ignoreTags
-        self.ignoreVehicles = ignoreVehicles
+    Shell.set_part = function(partTableIndex, ...)
+
+        local tb = table.unpack({...})
+        for index, value in pairs(tb) do
+            self[partTableIndex][index] = value -- shell parts are tables on the first level of the shell.
+        end
+
     end
 
-    Shell.modify_physics = function(self, vel, velStart, velMax, velAcc, velDecc, gravity, waver)
-        self.physics.gravity    = gravity
-        self.physics.vel        = vel
-        self.physics.velAcc     = velAcc
-        self.physics.velDecc    = velDecc
-        self.physics.velMax     = velMax
-        self.physics.velStart   = velStart
-        self.physics.waver      = waver
-    end
+    -- Shell.set_life = function(self, isActive, finished, hit, activeDuration)
+    --     self.life.hit = hit
+    --     self.life.isActive = isActive
+    --     self.life.isfinished = finished
+    --     self.life.activeDuration = activeDuration
+    -- end
+
+
+    -- Shell.set_query = function(self, ignoreShapes, ignoreBodies, ignoreVehicles, ignoreTags, ignoreLayers)
+    --     self.query.ignoreBodies = ignoreBodies
+    --     self.query.ignoreLayers = ignoreLayers
+    --     self.query.ignoreShapes = ignoreShapes
+    --     self.query.ignoreTags = ignoreTags
+    --     self.query.ignoreVehicles = ignoreVehicles
+    -- end
+
+    -- Shell.set_physics = function(self, vel, velStart, velMax, velAcc, velDecc, gravity, waver)
+    --     self.physics.gravity = gravity
+    --     self.physics.vel = vel
+    --     self.physics.velAcc = velAcc
+    --     self.physics.velDecc = velDecc
+    --     self.physics.velMax = velMax
+    --     self.physics.velStart = velStart
+    --     self.physics.waver = waver
+    -- end
+
 
 end
 
 
--- ShellParts from presets.
-Shell.setAbility = function(self)
-end
-
-Shell.setHitBehaviour = function(self)
-end
-
-Shell.setParticle = function(self)
-end
-
-Shell.setPhysics = function(self)
-end
-
-Shell.setSounds = function(self)
-end
-
-Shell.setType = function(self)
-end
-
--- ShellFunctions
-Shell.propel = function(self)
-    -- change the shell tr based on the physics of the shell.
-end
-
-Shell.home = function(self)
-    -- home a shell towards a target position
-    -- change rotation of the shell based on the speed of the shell and the homing strength.
-end
-
-Shell.hit()
-
-
-
-
+-- -- ShellParts from presets.
+-- Shell.setAbility = function(self)
+-- end
+-- Shell.setHitBehaviour = function(self)
+-- end
+-- Shell.setParticle = function(self)
+-- end
+-- Shell.setPhysics = function(self)
+-- end
+-- Shell.setSounds = function(self)
+-- end
+-- Shell.setType = function(self)
+-- end
+-- -- ShellFunctions
+-- Shell.propel = function(self)
+--     -- change the shell tr based on the physics of the shell.
+-- end
+-- Shell.home = function(self)
+--     -- home a shell towards a target position
+--     -- change rotation of the shell based on the speed of the shell and the homing strength.
+-- end
+-- Shell.hit()
 
 
 
@@ -222,11 +231,9 @@ end
 
 
 --[[
-
     Things to try
     - Create a base shell (shoots straight, nothing fancy)
     - Create a bullet (shoots straight, slows)
     - Create a projectile (slows down, drops down)
     - Create a rocket (starts slow, dropping, and speeds up)
-
 ]]
