@@ -13,12 +13,13 @@ do
 
 end
 
----comment
----@param shape shape
----@param preset table
----@param shell table
----@param shootPos table
-function PodCreatePod(shape, preset, shell, shootPos)
+
+---Create a pod and assign it to a shape.
+---@param shape any
+---@param pod_preset any
+---@param shell any
+---@param shoot_pos any
+function PodCreate(shape, pod_preset, shell, shoot_pos)
     -- Pod
         -- shape: shape (vehicle or external turret shape within vehicle body)
         -- location: shootPos (TTLP)
@@ -27,14 +28,15 @@ function PodCreatePod(shape, preset, shell, shootPos)
         -- number: rpm
         -- number: chargeUp (Duration to charge before shooting. Used for lasers and railguns)
 
-    return pod
+    -- return pod
 end
-function PodDeletePod()
+
+function PodRemove()
 end
 function PodSetEnabled(bool)
 end
 
-
 PodSetWeaponPod(shape, weaponPodPreset)
-PodShoot(pod, shell)
 PodShootShell(tr, activeShells)
+PodCharge()
+PodReload()

@@ -2,26 +2,18 @@
 -- do/end are used for level for line folding.
 -- The --! are part of a vscode extension that applies colors to comment with symbols like --!, --?, --* and so on. It is called "Better comments".
 
+
 ShellParts = {}
 do
 
     ShellParts.types = {}
     do
 
-        -- projectiles
+        -- projectiles (follow a quadratic path)
         ShellParts.types.projectiles = {}
 
             -- bullets
             ShellParts.types.projectiles.bullets = {}
-
-            -- plasmas
-            ShellParts.types.projectiles.plasmas = {}
-
-            -- rockets
-            ShellParts.types.projectiles.rockets = {}
-
-            -- missiles
-            ShellParts.types.projectiles.missiles = {}
 
             -- bombs
             ShellParts.types.projectiles.bombs = {}
@@ -30,18 +22,21 @@ do
             ShellParts.types.projectiles.barrages = {}
 
 
-        -- beams
-        ShellParts.types.beams = {}
+        ShellParts.types.pathed = {}
+
+            -- rockets
+            ShellParts.types.projectiles.rockets = {}
+
+            -- missiles (homing rockets)
+            ShellParts.types.pathed.missiles = {}
 
 
-        -- hitscan
+        -- hitscan (instant hit)
         ShellParts.types.hitscan = {}
 
             -- laser
             ShellParts.types.hitscan.laser = {}
 
-            -- railgun
-            ShellParts.types.hitscan.railgun = {}
     end
 
 
@@ -49,7 +44,6 @@ do
     do
         -- homing
         ShellParts.abilities.homing = {}
-
         -- barrage
         ShellParts.abilities.barrage = {}
     end
@@ -59,61 +53,154 @@ do
     do
         -- sticky
         ShellParts.hitBehaviours.sticky = {}
-
         -- bouncy
         ShellParts.hitBehaviours.bouncy = {}
-
         -- penetrating
         ShellParts.hitBehaviours.penetrating = {}
 
+        -- hole
+        ShellParts.hitBehaviours.hole = {}
         -- explosive
-        ShellParts.hitBehaviours.explosive = {}
-
+        ShellParts.hitBehaviours.explode = {}
         -- combust
         ShellParts.hitBehaviours.combust = {}
-    end
 
-
-    ShellParts.physics = {}
-    do
-        -- speed
-        ShellParts.physics.speed = {} --. Constant velocity of the shell in m/s.
-
-        -- accVel
-        ShellParts.physics.accVel = {} --. Accellerate until velocity = speed.
-
-        -- deccVel
-        ShellParts.physics.deccVel = {} --. Deccellerate until speed = zero.
-
-        -- gravity
-        ShellParts.physics.gravity = {} --. Drop towards ground based on speed.
     end
 
 end
 
 
-Shell = {}
-do
+-- Shell empty preset.
+Shell = {
 
-    ShellPresets.base = {
+    tr = nil,               -- The Transform() of the shell.
 
-        isActive = true, -- Shell still exists.
-        hit = false, -- Shell hit a valid object.
+    life = {
+        hit = false,        -- Shell has hit a valid object.
+        hitcount = 0,       -- Used for bounces.
+        isActive = false,   -- Shell still exists.
+        isfinished = false, -- Still has finished and is ready for removal.
+        lifeLength = 2,     -- How long a shell exists from the time it is spawned.
+    },
 
+    query = {
+        ignoreBodies = {},
+        ignoreLayers = {},
+        ignoreShapes = {},
+        ignoreTags = {}, -- Ignore tags attached to bodies and shapes.
+        ignoreVehicles = {},
+    },
+
+    physics = {
+        gravity = 0,
+        vel = 0,
+        velAcc = 0,
+        velDecc = 0,
+        velDelay = 0,
+        velMax = 0,
+        velStart = 0,
+        waver = 0, -- How much the shell.
+    },
+
+    homing = {
+        sourceTr = nil,
+        strength = nil,
+        targetBody = nil,
+        targetShape = nil,
+        targetTr = nil,
     }
 
+}
+
+
+-- Shell modifiers
+do
+    Shell.modify_life = function(self, isActive, finished, hit, lifeLength, tr)
+        self.hit        = hit
+        self.isActive   = isActive
+        self.isfinished   = finished
+        self.lifeLength = lifeLength
+    end
+
+    Shell.modify_query = function(self, ignoreShapes, ignoreBodies, ignoreVehicles, ignoreTags, ignoreLayers)
+        self.ignoreBodies   = ignoreBodies
+        self.ignoreLayers   = ignoreLayers
+        self.ignoreShapes   = ignoreShapes
+        self.ignoreTags     = ignoreTags
+        self.ignoreVehicles = ignoreVehicles
+    end
+
+    Shell.modify_physics = function(self, vel, velStart, velMax, velAcc, velDecc, gravity, waver)
+        self.physics.gravity    = gravity
+        self.physics.vel        = vel
+        self.physics.velAcc     = velAcc
+        self.physics.velDecc    = velDecc
+        self.physics.velMax     = velMax
+        self.physics.velStart   = velStart
+        self.physics.waver      = waver
+    end
+
 end
 
 
-Shell = {} -- Shell object
+
+-- Shell = {
+--     type = {},
+--     abilities = {},
+--     hitBehaviours = {},
+-- }
+
+
+
+function SpawnShell(tr, shellPreset, shellQueries)
+
+    local shell = TableClone(shellPreset)
+
+    shell.tr = tr
+
+    table.insert(ActiveShells, shell)
+
+end
+
 
 -- ShellParts from presets.
-ShellSetAbility()
-ShellSetType()
-ShellSetHitBehaviour()
-ShellSetPhysics()
-ShellSetParticle()
-ShellSetSounds()
+Shell.setAbility()
+Shell.setHitBehaviour()
+Shell.setParticle()
+Shell.setPhysics()
+Shell.setSounds()
+Shell.setType()
 
 -- ShellPresets
-ShellSetPreset()
+-- Shell.setPreset()
+
+-- ShellFunctions
+-- Shell.propel()
+-- Shell.home() -- Home a shell towards a target position
+-- Shell.hit()
+
+
+--[[
+
+    Things to try
+    - Create a base shell (shoots straight, nothing fancy)
+    - Create a bullet (shoots straight, slows)
+    - Create a projectile (slows down, drops down)
+    - Create a rocket (starts slow, dropping, and speeds up)
+
+]]
+
+
+
+--[[
+
+    Use cases:
+
+        - Shell spawning
+
+            - Spawn a bullet that ignores body tags
+                - tr
+                - bullet preset
+                    - high vel, small hole
+
+]]

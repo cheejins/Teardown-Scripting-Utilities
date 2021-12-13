@@ -40,38 +40,74 @@ function ParticleCreatePreset()
 end
 
 
-ParticleInterpolationPresets = {
 
+InterpolationPreset = {
+    y1 = 1,
+    y2 = 1,
+    type = InterpolationSets.standard.linear,
+}
 
+InterpolationPresets = {
+
+    linear = BuildInterpolationSet(InterpolationTypes.linear)
 
 }
 
----comment
----@param ... table InterpolationSet from InterpolationSets.
-function GetInterpolationSet(...)
-
-
+function BuildInterpolationSet()
 
 end
 
 
-InterpolationSets = {
+
+InterpolationModifier = {
+
+    rampInc = function(self)
+
+    end,
+
+    rampDec = function(self, y)
+        BuildInterpolationSet(InterpolationTypes.linear),
+    end,
 
 }
+
+
+
+InterpolationSets = {
+
+    standard = {
+        linear = BuildInterpolationSet(InterpolationTypes.linear),
+        smooth = BuildInterpolationSet(InterpolationTypes.smooth),
+        easein = BuildInterpolationSet(InterpolationTypes.easein),
+        easeout = BuildInterpolationSet(InterpolationTypes.easeout),
+        constant = BuildInterpolationSet(InterpolationTypes.constant),
+    }
+
+}
+
+InterpolationTypes = {
+    linear = 'linear',
+    smooth = 'smooth',
+    easein = 'easein',
+    easeout = 'easeout',
+    constant = 'constant',
+}
+
 
 
 ParticlePreset = {
 
+    -- Linear
     color   = Vec(),
-
     alpha   = {a, b},
-    emis    = {a, b},
-    drag    = {a, b},
-    tile    = n,
 
-    rad     = {a, b},
-    grav    = {a, b},
-    coll    = n,
+    -- Interpolated
+    -- emis    = {a, b},
+    -- drag    = {a, b},
+    -- tile    = n,
+
+    -- rad     = {a, b},
+    -- grav    = {a, b},
+    -- coll    = n,
 
 }
-

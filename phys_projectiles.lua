@@ -3,9 +3,7 @@ Projectiles = {}
 
 --- Run all active projectiles each frame.
 function ProjectilesRun()
-
     ProjectilesManageActiveProjectiles()
-
 end
 
 ---Instantiates a proj and adds it to the projectiles table.
