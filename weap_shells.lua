@@ -10,6 +10,7 @@ do
     do
 
         -- projectiles (free projectiles)
+        -- simple free moving, unmanaged
         ShellParts.types.projectiles = {}
 
             -- -- bullets
@@ -23,6 +24,7 @@ do
 
 
         -- shells which follow a path. used for predicted hit position
+        -- source and target pos is based on time and physics properties.
         ShellParts.types.pathed = {}
 
             -- -- rockets
@@ -32,10 +34,13 @@ do
             -- ShellParts.types.pathed.missiles = {}
 
         -- hitscan (instant raycast hit)
+        -- long raycast shot
+        -- effect from source to target
         ShellParts.types.hitscan = {}
 
             -- -- laser
             -- ShellParts.types.hitscan.laser = {}
+
 
     end
 
@@ -49,22 +54,26 @@ do
     -- end
 
 
-    -- ShellParts.hitBehaviours = {}
-    -- do
-    --     -- sticky
-    --     ShellParts.hitBehaviours.sticky = {
-    --         -- hit = stick to a shape
-    --         -- wait until calling hit action
-    --             -- fx function or something
-    --                 -- halo plasma grenade
-    --                 -- semtex
-    --                 -- no fx
-    --     }
-    --     -- bouncy
-    --     ShellParts.hitBehaviours.bouncy = {
-    --         -- set tr to dir normal
-    --     }
-    -- end
+    ShellParts.hitBehaviours = {}
+    do
+        -- sticky
+        ShellParts.hitBehaviours.sticky = {
+            -- hit = stick to a shape
+            -- wait until calling hit action
+                -- fx function or something
+                    -- halo plasma grenade
+                    -- semtex
+                    -- no fx
+        }
+        -- bouncy
+        ShellParts.hitBehaviours.bouncy = {
+            -- set tr to dir normal
+        }
+        -- water
+        ShellParts.hitBehaviours.water = {
+            -- decide if water ends the shell.
+        }
+    end
 
     -- ShellParts.hitActions = {}
     -- do
@@ -99,34 +108,37 @@ end
 -- Shell empty preset.
 Shell = {
 
-    tr = nil,               -- The Transform() of the shell.
+    tr = nil,                       -- The Transform() of the shell.
 
     life = {
-        hit = false,        -- Shell has hit a valid object.
-        hitcount = 0,       -- Used for bounces.
-        isActive = false,   -- Shell still exists.
-        isfinished = false, -- Still has finished and is ready for removal.
-        activeTime = 0,     -- Duration the shell has been active.
-        activeDuration = 2, -- How long a shell exists from the time it is spawned.
+        isValid = false,            -- Shell is ready for removal from this strange existence we find ourselves in.
+        isActive = false,           -- Shell is operating (false = stop processing shell functions).
+
+        hit = false,                -- Shell has hit a valid object.
+        hitsCount = 0,              -- Used for bounces.
+        hitsMax = 1,                -- Used for bounces.
+
+        timeOfSpawn = GetTime(),    -- When the shell was spawned according the the game time.
+        timeActive = 0,             -- Time duration the shell has been active.
+        timeActiveMax = 0,          -- How long a shell exists from the time it is spawned.
     },
 
     query = {
-        ignoreBodies = {},
-        ignoreLayers = {},
         ignoreShapes = {},
-        ignoreTags = {}, -- Ignore tags attached to bodies and shapes.
+        ignoreBodies = {},
         ignoreVehicles = {},
+        ignoreLayers = {},
     },
 
     physics = {
-        gravity = 0,
         vel = 0,
-        velAcc = 0,
-        velDecc = 0,
-        velDelay = 0,
         velMax = 0,
         velStart = 0,
-        waver = 0, -- How much the shell.
+        velDelay = 0,
+        velAcc = 0,
+        velDecc = 0,
+        gravity = 0,
+        waver = 0,                  -- How much the shell wavers based on speed.
     },
 
     homing = {
@@ -135,6 +147,11 @@ Shell = {
         targetShape = nil,
         targetTr = nil,
         strength = nil,
+    },
+
+    effects = {
+        particlesPreset = {},
+        soundsPreset = {},
     }
 
 }
@@ -143,97 +160,75 @@ Shell = {
 -- Shell modifiers
 do
 
-    Shell.set_life = function(...)
-
-        local tb = table.unpack({...})
-        for index, value in pairs(tb) do
-            self.life[index] = value
-        end
-
-    end
-
     Shell.set_part = function(partTableIndex, ...)
 
         local tb = table.unpack({...})
+
         for index, value in pairs(tb) do
-            self[partTableIndex][index] = value -- shell parts are tables on the first level of the shell.
+            self[partTableIndex][index] = value -- Shell parts are tables on the first level of the shell. Reference their index and iterate/replace all values.
         end
 
     end
-
-    -- Shell.set_life = function(self, isActive, finished, hit, activeDuration)
-    --     self.life.hit = hit
-    --     self.life.isActive = isActive
-    --     self.life.isfinished = finished
-    --     self.life.activeDuration = activeDuration
-    -- end
-
-
-    -- Shell.set_query = function(self, ignoreShapes, ignoreBodies, ignoreVehicles, ignoreTags, ignoreLayers)
-    --     self.query.ignoreBodies = ignoreBodies
-    --     self.query.ignoreLayers = ignoreLayers
-    --     self.query.ignoreShapes = ignoreShapes
-    --     self.query.ignoreTags = ignoreTags
-    --     self.query.ignoreVehicles = ignoreVehicles
-    -- end
-
-    -- Shell.set_physics = function(self, vel, velStart, velMax, velAcc, velDecc, gravity, waver)
-    --     self.physics.gravity = gravity
-    --     self.physics.vel = vel
-    --     self.physics.velAcc = velAcc
-    --     self.physics.velDecc = velDecc
-    --     self.physics.velMax = velMax
-    --     self.physics.velStart = velStart
-    --     self.physics.waver = waver
-    -- end
-
 
 end
 
 
--- -- ShellParts from presets.
--- Shell.setAbility = function(self)
--- end
--- Shell.setHitBehaviour = function(self)
--- end
--- Shell.setParticle = function(self)
--- end
--- Shell.setPhysics = function(self)
--- end
--- Shell.setSounds = function(self)
--- end
--- Shell.setType = function(self)
--- end
--- -- ShellFunctions
--- Shell.propel = function(self)
---     -- change the shell tr based on the physics of the shell.
--- end
--- Shell.home = function(self)
---     -- home a shell towards a target position
---     -- change rotation of the shell based on the speed of the shell and the homing strength.
--- end
--- Shell.hit()
+-- ShellParts from presets.
+Shell.setAbility = function(self)
+end
+
+Shell.setHitBehaviour = function(self)
+end
+
+Shell.setParticle = function(self)
+end
+
+Shell.setPhysics = function(self)
+end
+
+Shell.setSounds = function(self)
+end
+
+Shell.setType = function(self)
+end
 
 
+-- ShellFunctions
+Shell.propel = function(self)
+    -- change the shell tr based on the physics of the shell.
+
+    if self.physics.vel < self.physics.velMax then
+    end
+
+    -- durations based on game time and at what time the shell was spawned
+
+    -- waver
+    -- gravity
+
+    -- Replace the transform of the shell with the modified transform.
+
+end
+
+Shell.home = function(self)
+    -- home a shell towards a target position
+    -- change rotation of the shell based on the speed of the shell and the homing strength.
+end
+
+Shell.hit()
 
 
-
-
-function SpawnShell(tr, shellPreset, shellQueries)
+---Spawn a shell preset
+---@param tr table
+---@param shellPreset table
+function SpawnShell(tr, shellPreset, rejectShapes, rejectBodies, rejectVehicles)
 
     local shell = TableClone(shellPreset)
 
     shell.tr = tr
+    shell:applyPreset(shellPreset)
+
+    QueryRejectAll(rejectShapes, rejectBodies, rejectVehicles)
 
     table.insert(ActiveShells, shell)
 
 end
-
-
---[[
-    Things to try
-    - Create a base shell (shoots straight, nothing fancy)
-    - Create a bullet (shoots straight, slows)
-    - Create a projectile (slows down, drops down)
-    - Create a rocket (starts slow, dropping, and speeds up)
-]]

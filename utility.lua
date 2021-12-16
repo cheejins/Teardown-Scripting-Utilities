@@ -1,23 +1,27 @@
 --[[VECTORS]]
-    -- Distance between two vectors.
+
+    --- Distance between two vectors.
     function VecDist(a, b) return VecLength(VecSub(a, b)) end
-    -- Divide a vector by another vector.
+    --- Divide a vector by another vector's components.
     function VecDiv(a, b) return Vec(a[1] / b[1], a[2] / b[2], a[3] / b[3]) end
-    -- Add all vectors in a table together.
+    --- Add a table of vectors together.
     function VecAddAll(vtb) local v = Vec(0,0,0) for i = 1, #vtb do VecAdd(v, vtb[i]) end return v end
     --- Returns a vector with random values.
     function VecRdm(length)
         local v = VecNormalize(Vec(math.random(-100,100), math.random(-100,100), math.random(-100,100)))
-        return VecScale(v, length)	
+        return VecScale(v, length)
     end
-    ---Print QuatEulers or vectors.
+    --- Print QuatEulers or vectors.
     function VecPrint(vec, decimals, label)
-        DebugPrint((label or "") .. 
+        DebugPrint((label or "") ..
             "  " .. sfn(vec[1], decimals or 2) ..
             "  " .. sfn(vec[2], decimals or 2) ..
             "  " .. sfn(vec[3], decimals or 2))
     end
-
+    function VecApproach(startPos, endPos, speed)
+        local subtractedPos = VecScale(VecNormalize(VecSub(endPos, startPos)), speed)
+        return VecAdd(startPos, subtractedPos)
+    end
 
 
 --[[QUAT]]
@@ -32,7 +36,8 @@ do
 
     function QuatToDir(quat) return VecNormalize(TransformToParentPoint(Transform(Vec, quat), Vec(0,0,-1))) end -- Quat to normalized dir.
     function DirToQuat(dir) return QuatLookAt(Vec(0, 0, 0), dir) end -- Normalized dir to quat.
-    function GetDir(eye, target) return VecNormalize(VecSub(eye, target)) end -- Normalized dir of two positions.
+
+    function DirLookAt(eye, target) return VecNormalize(VecSub(eye, target)) end -- Normalized dir of two positions.
 end
 
 
@@ -69,13 +74,13 @@ end
         DebugLine(Vec(x1,y2,z2), Vec(x1,y2,z1), r, g, b, a)
     end
     function AabbCheckOverlap(aMin, aMax, bMin, bMax)
-        return 
+        return
         (aMin[1] <= bMax[1] and aMax[1] >= bMin[1]) and
         (aMin[2] <= bMax[2] and aMax[2] >= bMin[2]) and
         (aMin[3] <= bMax[3] and aMax[3] >= bMin[3])
     end
     function AabbCheckPointInside(aMin, aMax, pos)
-        return 
+        return
         (pos[1] <= aMax[1] and pos[1] >= aMin[1]) and
         (pos[2] <= aMax[2] and pos[2] >= aMin[2]) and
         (pos[3] <= aMax[3] and pos[3] >= aMin[3])
@@ -109,7 +114,7 @@ end
     function AabbSortEdges(startPos, endPos, edges)
         local s, startIndex = aabbClosestEdge(startPos, edges)
         local e, endIndex = aabbClosestEdge(endPos, edges)
-        -- Swap first index with startPos and last index with endPos. Everything between stays same.
+        --- Swap first index with startPos and last index with endPos. Everything between stays same.
         edges = tableSwapIndex(edges, 1, startIndex)
         edges = tableSwapIndex(edges, #edges, endIndex)
         return edges
@@ -138,7 +143,6 @@ end
     end
 
 
-
 --[[TABLES]]
     function TableSwapIndex(t, i1, i2)
         local temp = t[i1]
@@ -154,7 +158,7 @@ end
 
 
 
---[[RAYCASTING]]
+--[[QUERY]]
 ---comment
 ---@param tr table -- Source transform.
 ---@param distance number -- Max raycast distance. Default is 300.
@@ -191,6 +195,12 @@ end
         else
             return nil
         end
+    end
+
+    function QueryRejectAll(ignoreShapes, ignoreBodies, ignoreVehicles)
+        for i = 1, #ignoreShapes do QueryRejectShape(ignoreShapes[i]) end
+        for i = 1, #ignoreBodies do QueryRejectBody(ignoreBodies[i]) end
+        for i = 1, #ignoreVehicles do QueryRejectVehicle(ignoreVehicles[i]) end
     end
 
 
@@ -247,13 +257,9 @@ end
     --- return number if not = 0, else return 0.00000001
     function nZero(n) if n == 0 then return 0.00000001 end return n end
 
-
-    --- return number if not = 0, else return 0.00000001
     function rdm(min, max)
         return math.random(min, max-1) + math.random()
     end
-
-
     function clamp(value, mi, ma)
         if value < mi then value = mi end
         if value > ma then value = ma end
