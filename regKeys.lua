@@ -59,7 +59,7 @@ function checkKey()
         }
     ]]
 
-    local length = 3
+    local length = 5
     local words = {}
     table.insert(words, TableClone(alph))
     for l = 1, length-1  do -- word length
@@ -71,23 +71,27 @@ function checkKey()
             for w = 1, #words[l] do -- prev wordset
 
                 local word = words[l][w] .. alph[a]
-                table.insert(wordSet, word)
+                -- table.insert(wordSet, word)
+                if #ListKeys(word) >= 1 then
+                    print('word: ' .. word)
+                end
 
             end
 
         end
 
         table.insert(words, wordSet)
+        print('Checked length: ' .. l)
 
     end
 
-    for i = 1, #words do
-        local wordSet = ''
-        for j = 1, #words[i] do
-            wordSet = wordSet .. ', ' .. words[i][j]
-        end
-        print('\n' .. wordSet)
-    end
+    -- for i = 1, #words do
+    --     local wordSet = ''
+    --     for j = 1, #words[i] do
+    --         wordSet = wordSet .. ', ' .. words[i][j]
+    --     end
+    --     print('\n' .. wordSet)
+    -- end
 
 end
 
