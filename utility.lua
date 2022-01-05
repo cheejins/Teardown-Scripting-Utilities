@@ -22,6 +22,37 @@
         local subtractedPos = VecScale(VecNormalize(VecSub(endPos, startPos)), speed)
         return VecAdd(startPos, subtractedPos)
     end
+    function VecMult(vec1, vec2)
+        local vec = Vec(0,0,0)
+        for i = 1, 3 do vec[i] = vec1[i] * vec2[i] end
+        return vec
+    end
+
+
+    getCrosshairWorldPos = function(rejectBodies)
+
+        local crosshairTr = getCrosshairTr()
+        -- rejectAllBodies(rejectBodies)
+        local crosshairHit, crosshairHitPos = RaycastFromTransform(crosshairTr, 200)
+        if crosshairHit then
+            return crosshairHitPos
+        else
+            return nil
+        end
+
+    end
+
+    getCrosshairTr = function(pos, x, y)
+
+        pos = pos or GetCameraTransform()
+
+        local crosshairDir = UiPixelToWorld(x or UiCenter(), y or UiMiddle())
+        local crosshairQuat = DirToQuat(crosshairDir)
+        local crosshairTr = Transform(GetCameraTransform().pos, crosshairQuat)
+
+        return crosshairTr
+
+    end
 
 
 --[[QUAT]]
@@ -42,7 +73,7 @@ end
 
 
 --[[AABB]]
-
+do
     function AabbDimensions(min, max) return Vec(max[1] - min[1], max[2] - min[2], max[3] - min[3]) end
     function AabbDraw(v1, v2, r, g, b, a)
         r = r or 1
@@ -141,31 +172,33 @@ end
         v[2] = ma[2] + addY
         return v
     end
-
---[[OBB]]
-
-function ObbDrawShape(shape)
-
-    local shapeTr = GetShapeWorldTransform(shape)
-    local shapeDim = VecScale(Vec(sx, sy, sz), 0.1)
-    local maxTr = Transform(TransformToParentPoint(shapeTr, shapeDim), shapeTr.rot)
-
-    for i = 1, 3 do
-
-        local vec = Vec(0,0,0)
-
-        vec[i] = shapeDim[i]
-
-        DebugLine(shapeTr.pos, maxTr.pos)
-        DebugLine(shapeTr.pos, TransformToParentPoint(shapeTr, vec), 0,1,0, 1)
-        DebugLine(maxTr.pos, TransformToParentPoint(maxTr, VecScale(vec, -1)), 1,0,0, 1)
-
-    end
-
 end
 
+--[[OBB]]
+do
+    function ObbDrawShape(shape)
+
+        local shapeTr = GetShapeWorldTransform(shape)
+        local shapeDim = VecScale(Vec(sx, sy, sz), 0.1)
+        local maxTr = Transform(TransformToParentPoint(shapeTr, shapeDim), shapeTr.rot)
+
+        for i = 1, 3 do
+
+            local vec = Vec(0,0,0)
+
+            vec[i] = shapeDim[i]
+
+            DebugLine(shapeTr.pos, maxTr.pos)
+            DebugLine(shapeTr.pos, TransformToParentPoint(shapeTr, vec), 0,1,0, 1)
+            DebugLine(maxTr.pos, TransformToParentPoint(maxTr, VecScale(vec, -1)), 1,0,0, 1)
+
+        end
+
+    end
+end
 
 --[[TABLES]]
+do
     function TableSwapIndex(t, i1, i2)
         local temp = t[i1]
         t[i1] = t[i2]
@@ -177,22 +210,24 @@ end
         for k,v in pairs(tb) do tbc[k] = v end
         return tbc
     end
+end
 
 
 
 --[[QUERY]]
----comment
----@param tr table -- Source transform.
----@param distance number -- Max raycast distance. Default is 300.
----@param rad number -- Raycst radius.
----@param rejectBodies table -- Table of bodies to reject.
----@param rejectShapes table -- Table of shapes to reject.
----@param returnNil bool -- If true, return nil if no raycast hit. If false, return the end point of the raycast based on the transfom and distance.
----@return hit boolean
----@return hitPos table
----@return hitShape table
----@return hitBody table
----@return hitDist number
+do
+    ---comment
+    ---@param tr table -- Source transform.
+    ---@param distance number -- Max raycast distance. Default is 300.
+    ---@param rad number -- Raycst radius.
+    ---@param rejectBodies table -- Table of bodies to reject.
+    ---@param rejectShapes table -- Table of shapes to reject.
+    ---@param returnNil bool -- If true, return nil if no raycast hit. If false, return the end point of the raycast based on the transfom and distance.
+    ---@return hit boolean
+    ---@return hitPos table
+    ---@return hitShape table
+    ---@return hitBody table
+    ---@return hitDist number
     function RaycastFromTransform(tr, distance, rad, rejectBodies, rejectShapes, returnNil)
 
         if distance ~= nil then distance = -distance else distance = -300 end
@@ -224,10 +259,12 @@ end
         for i = 1, #ignoreBodies do QueryRejectBody(ignoreBodies[i]) end
         for i = 1, #ignoreVehicles do QueryRejectVehicle(ignoreVehicles[i]) end
     end
+end
 
 
 
 --[[PHYSICS]]
+do
     -- Reduce the angular body velocity by a certain rate each frame.
     function DiminishBodyAngVel(body, rate)
         local angVel = GetBodyAngularVelocity(body)
@@ -239,10 +276,11 @@ end
         return mat == 'rock' or mat == 'heavymetal' or mat == 'unbreakable' or mat == 'hardmasonry' or
             HasTag(shape,'unbreakable') or HasTag(GetShapeBody(shape),'unbreakable')
     end
-
+end
 
 
 --[[VFX]]
+do
     colors = {
         white = Vec(1,1,1),
         black = Vec(0,0,0),
@@ -261,18 +299,22 @@ end
         if dt == nil then dt = true end
         DrawSprite(dot, spriteTr, l or 0.2, w or 0.2, r or 1, g or 1, b or 1, a or 1, dt and true)
     end
+end
 
 
 
 --[[SOUND]]
+do
     function beep(pos, vol) PlaySound(LoadSound("warning-beep"), pos or GetCameraTransform().pos, vol or 0.3) end
     function buzz(pos, vol) PlaySound(LoadSound("light/spark0"), pos or GetCameraTransform().pos, vol or 0.3) end
     function chime(pos, vol) PlaySound(LoadSound("elevator-chime"), pos or GetCameraTransform().pos, vol or 0.3) end
     function shine(pos, vol) PlaySound(LoadSound("valuable.ogg"), pos or GetCameraTransform().pos, vol or 0.3) end
+end
 
 
 
 --[[MATH]]
+do
     function round(n, dec) local pow = 10^dec return math.floor(n * pow) / pow end
     --- return number if > 0, else return 0.00000001
     function gtZero(n) if n <= 0 then return 0.00000001 end return n end
@@ -322,17 +364,22 @@ end
         if x >= 0 then x = math.floor(x + 0.5) else x = math.ceil(x - 0.5) end
         return x / n
     end
+end
 
 
 
 --[[LOGIC]]
+do
     function ternary ( cond , T , F )
         if cond then return T else return F end
     end
+end
+
 
 
 
 --[[FORMATTING]]
+do
     --- string format. default 2 decimals.
     function sfn(numberToFormat, dec)
         local s = (tostring(dec or 2))
@@ -343,11 +390,13 @@ end
         return tostring(math.floor(dec)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
         -- https://stackoverflow.com/questions/10989788/format-integer-in-lua
     end
+end
+
 
 
 
 --[[TIMERS]]
-
+do
     ---Run a timer and a table of functions.
     ---@param timer table -- = {time, rpm}
     ---@param functions table -- Table of functions that are called when time = 0.
@@ -381,6 +430,8 @@ end
     function TimerResetTime(timer)
         timer.time = 60/timer.rpm
     end
+end
+
 
 
 

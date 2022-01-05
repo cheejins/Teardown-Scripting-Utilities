@@ -232,3 +232,39 @@ function SpawnShell(tr, shellPreset, rejectShapes, rejectBodies, rejectVehicles)
     table.insert(ActiveShells, shell)
 
 end
+
+
+base_Bullet = {
+    id = 0, -- auto assigned when bullet is created
+    shell = '.223',
+}
+
+base_Magazine = {
+
+    id = 0, -- auto assigned when magazine is created
+
+    bullets = {
+        -- Create an individual bullet (from the bullet base table)
+    }
+
+}
+
+Gun_ak47 = {
+
+    -- magazine
+        -- id = 298472384
+        -- bullets
+            -- bullet id = 23508749
+            -- bullet id = 57498325
+            -- bullet id = 54928357
+            -- bullet id = 09875437
+            -- bullet id = 42987534
+            -- bullet id = 52458973
+
+}
+
+function shootGun(gun)
+
+    gun.magazine.bullets[#gun.magazine.bullets] = nil -- Remove the topmost bullet in the magazine from this universe never to be seen again.
+
+end
