@@ -64,11 +64,27 @@ do
     function QuatTrLookDown(tr) return QuatLookAt(tr.pos, TransformToParentPoint(tr, Vec(0,-1,0))) end
     function QuatTrLookLeft(tr) return QuatLookAt(tr.pos, TransformToParentPoint(tr, Vec(-1,0,0))) end
     function QuatTrLookRight(tr) return QuatLookAt(tr.pos, TransformToParentPoint(tr, Vec(1,0,0))) end
+    function QuatTrLookBack(tr) return QuatLookAt(tr.pos, TransformToParentPoint(tr, Vec(0,0,1))) end
 
     function QuatToDir(quat) return VecNormalize(TransformToParentPoint(Transform(Vec, quat), Vec(0,0,-1))) end -- Quat to normalized dir.
     function DirToQuat(dir) return QuatLookAt(Vec(0, 0, 0), dir) end -- Normalized dir to quat.
 
     function DirLookAt(eye, target) return VecNormalize(VecSub(eye, target)) end -- Normalized dir of two positions.
+
+    function VecAngle(a,b) -- Angle between two vectors.
+        local c = {a[1], a[2], a[3]}
+        local d = {b[1], b[2], b[3]}
+        return math.deg(math.acos(myDot(c, d) / (myMag(c) * myMag(d))))
+    end
+
+    function QuatAngle(a,b) -- Angle between two vectors.
+        av = QuatToDir(a)
+        bv = QuatToDir(b)
+        local c = {av[1], av[2], av[3]}
+        local d = {bv[1], bv[2], bv[3]}
+        return math.deg(math.acos(myDot(c, d) / (myMag(c) * myMag(d))))
+    end
+
 end
 
 
@@ -210,8 +226,67 @@ do
         for k,v in pairs(tb) do tbc[k] = v end
         return tbc
     end
-end
 
+    function DeepCopy(orig)
+        local orig_type = type(orig)
+        local copy
+        if orig_type == 'table' then
+            copy = {}
+            for orig_key, orig_value in next, orig, nil do
+                copy[DeepCopy(orig_key)] = DeepCopy(orig_value)
+            end
+            setmetatable(copy, DeepCopy(getmetatable(orig)))
+        else -- number, string, boolean, etc
+            copy = orig
+        end
+        return copy
+    end
+
+
+    ---@param t table -- table to print
+    ---@param n number -- recursion depth (leave as 0)
+    function printTable(t, n)
+
+        n = n or 0
+
+        if n == 0 then
+            print('--- --- --- --- --- --- --- --- ---\n')
+        end
+
+        local tabs = ''
+        for i = 1, n do
+            tabs = tabs .. '  '
+        end
+
+        for index, value in pairs(t) do
+
+            n = n + 1
+
+            if type(value) == 'table' then
+
+                print(index)
+                printTable(value, n)
+
+                n = n - 1
+
+            else
+
+                print(tabs .. index .. ' = ' .. value)
+
+            end
+
+        end
+
+        print('')
+
+    end
+
+    function GetRandomIndex(tb)
+        return tb[math.random(1, #tb)]
+    end
+
+
+end
 
 
 --[[QUERY]]
@@ -230,35 +305,26 @@ do
     ---@return hitDist number
     function RaycastFromTransform(tr, distance, rad, rejectBodies, rejectShapes, returnNil)
 
-        if distance ~= nil then distance = -distance else distance = -300 end
+        if distance == nil then distance = 300 end
 
         if rejectBodies ~= nil then for i = 1, #rejectBodies do QueryRejectBody(rejectBodies[i]) end end
         if rejectShapes ~= nil then for i = 1, #rejectShapes do QueryRejectShape(rejectShapes[i]) end end
 
         returnNil = returnNil or false
 
-        local plyTransform = tr
-        local fwdPos = TransformToParentPoint(plyTransform, Vec(0, 0, distance))
-        local direction = VecSub(fwdPos, plyTransform.pos)
-        local dist = VecLength(direction)
-        direction = VecNormalize(direction)
-        local h, d, n, s = QueryRaycast(tr.pos, direction, dist, rad)
+        local direction = QuatToDir(tr.rot)
+        local h, d, n, s = QueryRaycast(tr.pos, direction, distance, rad)
         if h then
-            local p = TransformToParentPoint(plyTransform, Vec(0, 0, d * -1))
+            local p = TransformToParentPoint(tr, Vec(0, 0, d * -1))
             local b = GetShapeBody(s)
-            return h, p, s, b, d
-        elseif not returnNil then
-            return true, TransformToParentPoint(tr, Vec(0,0,-300))
-        else
+            return h, p, s, b, d, n
+        elseif returnNil then
             return nil
+        else
+            return true, TransformToParentPoint(tr, Vec(0,0,-100))
         end
     end
 
-    function QueryRejectAll(ignoreShapes, ignoreBodies, ignoreVehicles)
-        for i = 1, #ignoreShapes do QueryRejectShape(ignoreShapes[i]) end
-        for i = 1, #ignoreBodies do QueryRejectBody(ignoreBodies[i]) end
-        for i = 1, #ignoreVehicles do QueryRejectVehicle(ignoreVehicles[i]) end
-    end
 end
 
 
@@ -397,6 +463,11 @@ end
 
 --[[TIMERS]]
 do
+
+    function TimerCreate(time, rpm)
+        return {time = time, rpm = rpm}
+    end
+
     ---Run a timer and a table of functions.
     ---@param timer table -- = {time, rpm}
     ---@param functions table -- Table of functions that are called when time = 0.
@@ -434,6 +505,15 @@ end
 
 
 
-
--- Ideas
---> Manage input bool (bool ref and input pressed)
+--[[TOOL]]
+---Disable all tools except specified ones.
+---@param allowTools table -- Table of strings (tool names) to not disable.
+function disableTools(allowTools)
+    local toolNames = {sledge = 'sledge', spraycan = 'spraycan', extinguisher ='extinguisher', blowtorch = 'blowtorch'}
+    local tools = ListKeys("game.tool")
+    for i=1, #tools do
+        if tools[i] ~= toolNames[tools[i]] then
+            SetBool("game.tool."..tools[i]..".enabled", false)
+        end
+    end
+end

@@ -11,7 +11,7 @@ end
 ---@param projPreset table
 ---@param ignoreBodies table -- Table of raycast bodies to ignore.
 ---@param ignoreShapes table -- Table of raycast shapes to ignore.
-function ProjectilesCreate(tr, projPreset, ignoreBodies, ignoreShapes)
+function ProjectileCreate(tr, projPreset, ignoreBodies, ignoreShapes)
     local proj = TableClone(projPreset)
 
     proj.tr = tr

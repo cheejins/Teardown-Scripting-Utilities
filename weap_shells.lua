@@ -33,13 +33,13 @@ do
             -- -- missiles (homing rockets)
             -- ShellParts.types.pathed.missiles = {}
 
-        -- hitscan (instant raycast hit)
+        -- ray (instant raycast hit)
         -- long raycast shot
         -- effect from source to target
-        ShellParts.types.hitscan = {}
+        ShellParts.types.ray = {}
 
             -- -- laser
-            -- ShellParts.types.hitscan.laser = {}
+            -- ShellParts.types.ray.laser = {}
 
 
     end
@@ -108,10 +108,10 @@ end
 -- Shell empty preset.
 Shell = {
 
-    tr = nil,                       -- The Transform() of the shell.
+    id = 0,
 
     life = {
-        isValid = false,            -- Shell is ready for removal from this strange existence we find ourselves in.
+        isValid = true,             -- Shell is ready for removal from this strange existence we find ourselves in.
         isActive = false,           -- Shell is operating (false = stop processing shell functions).
 
         hit = false,                -- Shell has hit a valid object.
@@ -131,6 +131,7 @@ Shell = {
     },
 
     physics = {
+        tr = nil,                   -- The Transform() of the shell.
         vel = 0,
         velMax = 0,
         velStart = 0,
@@ -174,27 +175,27 @@ end
 
 
 -- ShellParts from presets.
-Shell.setAbility = function(self)
+Shell_SetAbility = function(self)
 end
 
-Shell.setHitBehaviour = function(self)
+Shell_SetHitBehaviour = function(self)
 end
 
-Shell.setParticle = function(self)
+Shell_SetParticle = function(self)
 end
 
-Shell.setPhysics = function(self)
+Shell_SetPhysics = function(self)
 end
 
-Shell.setSounds = function(self)
+Shell_SetSounds = function(self)
 end
 
-Shell.setType = function(self)
+Shell_SetType = function(self)
 end
 
 
 -- ShellFunctions
-Shell.propel = function(self)
+Shell_Propel = function(self)
     -- change the shell tr based on the physics of the shell.
 
     if self.physics.vel < self.physics.velMax then
@@ -209,12 +210,13 @@ Shell.propel = function(self)
 
 end
 
-Shell.home = function(self)
+Shell_Home = function(self)
     -- home a shell towards a target position
     -- change rotation of the shell based on the speed of the shell and the homing strength.
 end
 
-Shell.hit()
+Shell_Hit = function(self)
+end
 
 
 ---Spawn a shell preset
@@ -230,41 +232,5 @@ function SpawnShell(tr, shellPreset, rejectShapes, rejectBodies, rejectVehicles)
     QueryRejectAll(rejectShapes, rejectBodies, rejectVehicles)
 
     table.insert(ActiveShells, shell)
-
-end
-
-
-base_Bullet = {
-    id = 0, -- auto assigned when bullet is created
-    shell = '.223',
-}
-
-base_Magazine = {
-
-    id = 0, -- auto assigned when magazine is created
-
-    bullets = {
-        -- Create an individual bullet (from the bullet base table)
-    }
-
-}
-
-Gun_ak47 = {
-
-    -- magazine
-        -- id = 298472384
-        -- bullets
-            -- bullet id = 23508749
-            -- bullet id = 57498325
-            -- bullet id = 54928357
-            -- bullet id = 09875437
-            -- bullet id = 42987534
-            -- bullet id = 52458973
-
-}
-
-function shootGun(gun)
-
-    gun.magazine.bullets[#gun.magazine.bullets] = nil -- Remove the topmost bullet in the magazine from this universe never to be seen again.
 
 end
